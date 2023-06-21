@@ -1,0 +1,9 @@
+{
+  "name": "ManagerDetector",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/AzumattDev/ManagerDetector",
+  "description": "A debugging developer tool that determines what mods you have that are using any of the managers made by Blaxxun/Azumatt",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2105"
+  ]
+}
