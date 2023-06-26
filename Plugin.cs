@@ -6,6 +6,7 @@ using BepInEx.Bootstrap;
 using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
+using Logger = HarmonyLib.Tools.Logger;
 
 namespace ManagerDetector
 {
@@ -14,7 +15,7 @@ namespace ManagerDetector
     public class ManagerDetectorPlugin : BaseUnityPlugin
     {
         internal const string ModName = "ManagerDetector";
-        internal const string ModVersion = "1.0.1";
+        internal const string ModVersion = "1.0.2";
         internal const string Author = "Azumatt";
         private const string ModGUID = Author + "." + ModName;
 
@@ -97,17 +98,25 @@ namespace ManagerDetector
                 if (managerInfo.List.Count > 0)
                 {
                     ConsoleManager.SetConsoleColor(managerInfo.ConsoleColor);
-                    ConsoleManager.StandardOutStream.WriteLine($"{Environment.NewLine}[Debug  :{ModName}] The following mods have {managerInfo.NamespaceName}:");
+                    ConsoleManager.ConsoleStream.WriteLine($"{Environment.NewLine}[Debug  :{ModName}] The following mods have {managerInfo.NamespaceName}:");
                     foreach (var mod in managerInfo.List)
                     {
                         ConsoleManager.StandardOutStream.WriteLine($"[Debug  :{ModName}] {mod}");
                     }
 
                     ConsoleManager.SetConsoleColor(ConsoleColor.White);
+                    // Also print to log files for easier debugging, must be done after setting the color back to white, otherwise the lines above will not be colored as intended
+                    // This is just so it logs to the file.
+                    ManagerDetectorLogger.LogInfo($"{Environment.NewLine}The following mods have {managerInfo.NamespaceName}:");
+                    foreach (var mod in managerInfo.List)
+                    {
+                        ManagerDetectorLogger.LogInfo($"{mod}");
+                    }
                 }
             }
         }
     }
+
 
     public class ManagerInfo
     {
