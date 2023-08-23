@@ -15,7 +15,7 @@ namespace ManagerDetector
     public class ManagerDetectorPlugin : BaseUnityPlugin
     {
         internal const string ModName = "ManagerDetector";
-        internal const string ModVersion = "1.0.2";
+        internal const string ModVersion = "1.0.3";
         internal const string Author = "Azumatt";
         private const string ModGUID = Author + "." + ModName;
 
@@ -55,9 +55,9 @@ namespace ManagerDetector
             LogTheManagers();
         }
 
-        private static Type GetManagerType(Assembly assembly, string namespaceName, string className)
+        private static Type? GetManagerType(Assembly assembly, string? namespaceName, string? className)
         {
-            foreach (var type in assembly.GetTypes())
+            foreach (Type type in assembly.GetTypes())
             {
                 if (type.Namespace == namespaceName && type.Name == className)
                 {
@@ -70,48 +70,83 @@ namespace ManagerDetector
 
         private static void CheckManagers(Assembly assembly, PluginInfo info)
         {
-            foreach (var managerInfo in Managers)
+            foreach (ManagerInfo? managerInfo in Managers)
             {
                 if (GetManagerType(assembly, managerInfo.NamespaceName, managerInfo.ClassName) != null)
                 {
-                    managerInfo.List.Add($"{info.Metadata.Name} [{info.Metadata.GUID} {info.Metadata.Version}]");
+                    managerInfo.List?.Add($"{info.Metadata.Name} [{info.Metadata.GUID} {info.Metadata.Version}]");
                 }
             }
         }
 
         private static void LogTheManagers()
         {
-            foreach (var managerInfo in Managers)
+            foreach (ManagerInfo? managerInfo in Managers)
             {
-                managerInfo.List.Clear();
+                managerInfo.List?.Clear();
             }
 
-            foreach (var info in Chainloader.PluginInfos.Values)
+            foreach (PluginInfo? info in Chainloader.PluginInfos.Values)
             {
-                var assembly = info.Instance.GetType().Assembly;
+                Assembly assembly = info.Instance.GetType().Assembly;
                 CheckManagers(assembly, info);
             }
 
-            // Print all mods with managers
-            foreach (var managerInfo in Managers)
+            foreach (ManagerInfo? managerInfo in Managers)
             {
-                if (managerInfo.List.Count > 0)
-                {
-                    ConsoleManager.SetConsoleColor(managerInfo.ConsoleColor);
-                    ConsoleManager.ConsoleStream.WriteLine($"{Environment.NewLine}[Debug  :{ModName}] The following mods have {managerInfo.NamespaceName}:");
-                    foreach (var mod in managerInfo.List)
-                    {
-                        ConsoleManager.StandardOutStream.WriteLine($"[Debug  :{ModName}] {mod}");
-                    }
+                if (managerInfo.List is { Count: <= 0 }) continue;
 
-                    ConsoleManager.SetConsoleColor(ConsoleColor.White);
-                    // Also print to log files for easier debugging, must be done after setting the color back to white, otherwise the lines above will not be colored as intended
-                    // This is just so it logs to the file.
-                    ManagerDetectorLogger.LogInfo($"{Environment.NewLine}The following mods have {managerInfo.NamespaceName}:");
-                    foreach (var mod in managerInfo.List)
-                    {
-                        ManagerDetectorLogger.LogInfo($"{mod}");
-                    }
+                if (Application.platform == RuntimePlatform.WindowsPlayer)
+                {
+                    HandleWindowsPlatform(managerInfo);
+                }
+                else
+                {
+                    HandleOtherPlatforms(managerInfo);
+                }
+            }
+        }
+
+        private static void HandleWindowsPlatform(ManagerInfo managerInfo)
+        {
+            ConsoleManager.SetConsoleColor(managerInfo.ConsoleColor);
+
+            string headerMessage = $"{Environment.NewLine}[Debug  :{ModName}] The following mods have {managerInfo.NamespaceName}:";
+            ConsoleManager.ConsoleStream.WriteLine(headerMessage);
+
+            if (managerInfo.List == null) return;
+            foreach (string? mod in managerInfo.List)
+            {
+                ConsoleManager.StandardOutStream.WriteLine($"[Debug  :{ModName}] {mod}");
+            }
+
+            ConsoleManager.SetConsoleColor(ConsoleColor.White);
+
+            LogToDisk(headerMessage);
+            foreach (string? mod in managerInfo.List)
+            {
+                LogToDisk($"[Debug  :{ModName}] {mod}");
+            }
+        }
+
+        private static void HandleOtherPlatforms(ManagerInfo managerInfo)
+        {
+            ManagerDetectorLogger.LogInfo($"{Environment.NewLine}The following mods have {managerInfo.NamespaceName}:");
+
+            if (managerInfo.List == null) return;
+            foreach (string? mod in managerInfo.List)
+            {
+                ManagerDetectorLogger.LogInfo($"{mod}");
+            }
+        }
+
+        private static void LogToDisk(string message)
+        {
+            foreach (ILogListener logListener in BepInEx.Logging.Logger.Listeners)
+            {
+                if (logListener is DiskLogListener { LogWriter: not null } bepinexlog)
+                {
+                    bepinexlog.LogWriter.WriteLine(message);
                 }
             }
         }
@@ -120,9 +155,9 @@ namespace ManagerDetector
 
     public class ManagerInfo
     {
-        public string NamespaceName { get; set; }
-        public string ClassName { get; set; }
-        public List<string> List { get; set; }
+        public string? NamespaceName { get; set; }
+        public string? ClassName { get; set; }
+        public List<string>? List { get; set; }
         public ConsoleColor ConsoleColor { get; set; }
     }
 }
