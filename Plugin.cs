@@ -15,7 +15,7 @@ namespace ManagerDetector
     public class ManagerDetectorPlugin : BaseUnityPlugin
     {
         internal const string ModName = "ManagerDetector";
-        internal const string ModVersion = "1.0.3";
+        internal const string ModVersion = "1.0.4";
         internal const string Author = "Azumatt";
         private const string ModGUID = Author + "." + ModName;
 
