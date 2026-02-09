@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using BepInEx;
 using BepInEx.Bootstrap;
@@ -25,14 +26,14 @@ namespace ManagerDetector
 
         private static readonly List<ManagerInfo> Managers = new()
         {
-            new ManagerInfo { NamespaceName = "PieceManager", ClassName = "BuildPiece", List = new List<string>(), ConsoleColor = ConsoleColor.DarkGreen },
-            new ManagerInfo { NamespaceName = "ItemManager", ClassName = "Item", List = new List<string>(), ConsoleColor = ConsoleColor.DarkYellow },
-            new ManagerInfo { NamespaceName = "ItemDataManager", ClassName = "ItemInfo", List = new List<string>(), ConsoleColor = ConsoleColor.Blue },
-            new ManagerInfo { NamespaceName = "SkillManager", ClassName = "Skill", List = new List<string>(), ConsoleColor = ConsoleColor.Cyan },
-            new ManagerInfo { NamespaceName = "LocationManager", ClassName = "Location", List = new List<string>(), ConsoleColor = ConsoleColor.DarkCyan },
-            new ManagerInfo { NamespaceName = "CreatureManager", ClassName = "Creature", List = new List<string>(), ConsoleColor = ConsoleColor.DarkMagenta },
-            new ManagerInfo { NamespaceName = "LocalizationManager", ClassName = "Localizer", List = new List<string>(), ConsoleColor = ConsoleColor.DarkRed },
-            new ManagerInfo { NamespaceName = "StatusEffectManager", ClassName = "CustomSE", List = new List<string>(), ConsoleColor = ConsoleColor.Magenta },
+            new ManagerInfo { NamespaceName = "PieceManager", ClassName = "BuildPiece", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkGreen },
+            new ManagerInfo { NamespaceName = "ItemManager", ClassName = "Item", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkYellow },
+            new ManagerInfo { NamespaceName = "ItemDataManager", ClassName = "ItemInfo", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.Blue },
+            new ManagerInfo { NamespaceName = "SkillManager", ClassName = "Skill", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.Cyan },
+            new ManagerInfo { NamespaceName = "LocationManager", ClassName = "Location", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkCyan },
+            new ManagerInfo { NamespaceName = "CreatureManager", ClassName = "Creature", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkMagenta },
+            new ManagerInfo { NamespaceName = "LocalizationManager", ClassName = "Localizer", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkRed },
+            new ManagerInfo { NamespaceName = "StatusEffectManager", ClassName = "CustomSE", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.Magenta },
         };
 
         public void Awake()
@@ -99,8 +100,15 @@ namespace ManagerDetector
                 if (GetManagerType(assembly, managerInfo.NamespaceName, managerInfo.ClassName) != null)
                 {
                     string? version = GetManagerVersion(assembly, managerInfo.NamespaceName);
-                    string versionSuffix = version != null ? $" (Manager Version: {version})" : " (Manager Version string not found.)";
-                    managerInfo.List?.Add($"{info.Metadata.Name} [{info.Metadata.GUID} {info.Metadata.Version}]{versionSuffix}");
+                    string dllName = !string.IsNullOrEmpty(assembly.Location) ? Path.GetFileName(assembly.Location) : assembly.GetName().Name + ".dll";
+                    managerInfo.Entries?.Add(new ModEntry
+                    {
+                        Name = info.Metadata.Name,
+                        Version = info.Metadata.Version.ToString(),
+                        Guid = info.Metadata.GUID,
+                        DllName = dllName,
+                        ManagerVersion = version
+                    });
                 }
             }
         }
@@ -109,7 +117,7 @@ namespace ManagerDetector
         {
             foreach (ManagerInfo? managerInfo in Managers)
             {
-                managerInfo.List?.Clear();
+                managerInfo.Entries?.Clear();
             }
 
             foreach (PluginInfo? info in Chainloader.PluginInfos.Values)
@@ -120,7 +128,7 @@ namespace ManagerDetector
 
             foreach (ManagerInfo? managerInfo in Managers)
             {
-                if (managerInfo.List is { Count: <= 0 }) continue;
+                if (managerInfo.Entries is not { Count: > 0 }) continue;
 
                 if (Application.platform == RuntimePlatform.WindowsPlayer)
                 {
@@ -133,6 +141,32 @@ namespace ManagerDetector
             }
         }
 
+        private static List<string> FormatAligned(List<ModEntry> entries)
+        {
+            int maxName = 0, maxGuid = 0, maxDll = 0;
+            foreach (ModEntry entry in entries)
+            {
+                int nameLen = entry.Name.Length + 2 + entry.Version.Length; // "Name vX.Y.Z"
+                if (nameLen > maxName) maxName = nameLen;
+                if (entry.Guid.Length > maxGuid) maxGuid = entry.Guid.Length;
+                if (entry.DllName.Length > maxDll) maxDll = entry.DllName.Length;
+            }
+
+            List<string> lines = new();
+            foreach (ModEntry entry in entries)
+            {
+                string nameCol = $"{entry.Name} v{entry.Version}".PadRight(maxName);
+                string guidCol = entry.Guid.PadRight(maxGuid);
+                string dllCol = entry.DllName.PadRight(maxDll);
+                string versionCol = entry.ManagerVersion != null
+                    ? $"Manager v{entry.ManagerVersion}"
+                    : "Manager version not found, consider updating!";
+                lines.Add($"{nameCol} | {guidCol} | {dllCol} | {versionCol}");
+            }
+
+            return lines;
+        }
+
         private static void HandleWindowsPlatform(ManagerInfo managerInfo)
         {
             ConsoleManager.SetConsoleColor(managerInfo.ConsoleColor);
@@ -140,18 +174,19 @@ namespace ManagerDetector
             string headerMessage = $"{Environment.NewLine}[Debug  :{ModName}] The following mods have {managerInfo.NamespaceName}:";
             ConsoleManager.ConsoleStream.WriteLine(headerMessage);
 
-            if (managerInfo.List == null) return;
-            foreach (string? mod in managerInfo.List)
+            if (managerInfo.Entries == null) return;
+            List<string> lines = FormatAligned(managerInfo.Entries);
+            foreach (string line in lines)
             {
-                ConsoleManager.StandardOutStream.WriteLine($"[Debug  :{ModName}] {mod}");
+                ConsoleManager.StandardOutStream.WriteLine($"[Debug  :{ModName}] {line}");
             }
 
             ConsoleManager.SetConsoleColor(ConsoleColor.White);
 
             LogToDisk(headerMessage);
-            foreach (string? mod in managerInfo.List)
+            foreach (string line in lines)
             {
-                LogToDisk($"[Debug  :{ModName}] {mod}");
+                LogToDisk($"[Debug  :{ModName}] {line}");
             }
         }
 
@@ -159,10 +194,11 @@ namespace ManagerDetector
         {
             ManagerDetectorLogger.LogInfo($"{Environment.NewLine}The following mods have {managerInfo.NamespaceName}:");
 
-            if (managerInfo.List == null) return;
-            foreach (string? mod in managerInfo.List)
+            if (managerInfo.Entries == null) return;
+            List<string> lines = FormatAligned(managerInfo.Entries);
+            foreach (string line in lines)
             {
-                ManagerDetectorLogger.LogInfo($"{mod}");
+                ManagerDetectorLogger.LogInfo(line);
             }
         }
 
@@ -183,7 +219,16 @@ namespace ManagerDetector
     {
         public string? NamespaceName { get; set; }
         public string? ClassName { get; set; }
-        public List<string>? List { get; set; }
+        public List<ModEntry>? Entries { get; set; }
         public ConsoleColor ConsoleColor { get; set; }
+    }
+
+    public class ModEntry
+    {
+        public string Name { get; set; } = "";
+        public string Version { get; set; } = "";
+        public string Guid { get; set; } = "";
+        public string DllName { get; set; } = "";
+        public string? ManagerVersion { get; set; }
     }
 }
