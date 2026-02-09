@@ -15,7 +15,7 @@ namespace ManagerDetector
     public class ManagerDetectorPlugin : BaseUnityPlugin
     {
         internal const string ModName = "ManagerDetector";
-        internal const string ModVersion = "1.0.5";
+        internal const string ModVersion = "1.0.6";
         internal const string Author = "Azumatt";
         private const string ModGUID = Author + "." + ModName;
 
@@ -31,6 +31,8 @@ namespace ManagerDetector
             new ManagerInfo { NamespaceName = "SkillManager", ClassName = "Skill", List = new List<string>(), ConsoleColor = ConsoleColor.Cyan },
             new ManagerInfo { NamespaceName = "LocationManager", ClassName = "Location", List = new List<string>(), ConsoleColor = ConsoleColor.DarkCyan },
             new ManagerInfo { NamespaceName = "CreatureManager", ClassName = "Creature", List = new List<string>(), ConsoleColor = ConsoleColor.DarkMagenta },
+            new ManagerInfo { NamespaceName = "LocalizationManager", ClassName = "Localizer", List = new List<string>(), ConsoleColor = ConsoleColor.DarkRed },
+            new ManagerInfo { NamespaceName = "StatusEffectManager", ClassName = "CustomSE", List = new List<string>(), ConsoleColor = ConsoleColor.Magenta },
         };
 
         public void Awake()
@@ -78,13 +80,27 @@ namespace ManagerDetector
             return null;
         }
 
+        private static string? GetManagerVersion(Assembly assembly, string? namespaceName)
+        {
+            if (namespaceName == null) return null;
+
+            string versionClassName = namespaceName + "Version";
+            Type? versionType = GetManagerType(assembly, namespaceName, versionClassName);
+            if (versionType == null) return null;
+
+            FieldInfo? versionField = versionType.GetField("Version", BindingFlags.Public | BindingFlags.Static);
+            return versionField?.GetValue(null) as string;
+        }
+
         private static void CheckManagers(Assembly assembly, PluginInfo info)
         {
             foreach (ManagerInfo? managerInfo in Managers)
             {
                 if (GetManagerType(assembly, managerInfo.NamespaceName, managerInfo.ClassName) != null)
                 {
-                    managerInfo.List?.Add($"{info.Metadata.Name} [{info.Metadata.GUID} {info.Metadata.Version}]");
+                    string? version = GetManagerVersion(assembly, managerInfo.NamespaceName);
+                    string versionSuffix = version != null ? $" (Manager Version: {version})" : " (Manager Version string not found.)";
+                    managerInfo.List?.Add($"{info.Metadata.Name} [{info.Metadata.GUID} {info.Metadata.Version}]{versionSuffix}");
                 }
             }
         }
