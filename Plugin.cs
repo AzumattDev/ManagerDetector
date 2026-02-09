@@ -26,14 +26,14 @@ namespace ManagerDetector
 
         private static readonly List<ManagerInfo> Managers = new()
         {
-            new ManagerInfo { NamespaceName = "PieceManager", ClassName = "BuildPiece", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkGreen },
-            new ManagerInfo { NamespaceName = "ItemManager", ClassName = "Item", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkYellow },
-            new ManagerInfo { NamespaceName = "ItemDataManager", ClassName = "ItemInfo", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.Blue },
-            new ManagerInfo { NamespaceName = "SkillManager", ClassName = "Skill", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.Cyan },
-            new ManagerInfo { NamespaceName = "LocationManager", ClassName = "Location", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkCyan },
-            new ManagerInfo { NamespaceName = "CreatureManager", ClassName = "Creature", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkMagenta },
-            new ManagerInfo { NamespaceName = "LocalizationManager", ClassName = "Localizer", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkRed },
-            new ManagerInfo { NamespaceName = "StatusEffectManager", ClassName = "CustomSE", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.Magenta },
+            new ManagerInfo { NamespaceName = "PieceManager", ClassName = "BuildPiece", LatestVersion = "1.2.9", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkGreen },
+            new ManagerInfo { NamespaceName = "ItemManager", ClassName = "Item", LatestVersion = "1.2.9", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkYellow },
+            new ManagerInfo { NamespaceName = "ItemDataManager", ClassName = "ItemInfo", LatestVersion = null, Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.Blue },
+            new ManagerInfo { NamespaceName = "SkillManager", ClassName = "Skill", LatestVersion = "1.7.0", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.Cyan },
+            new ManagerInfo { NamespaceName = "LocationManager", ClassName = "Location", LatestVersion = null, Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkCyan },
+            new ManagerInfo { NamespaceName = "CreatureManager", ClassName = "Creature", LatestVersion = "1.13.0", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkMagenta },
+            new ManagerInfo { NamespaceName = "LocalizationManager", ClassName = "Localizer", LatestVersion = "1.4.0", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkRed },
+            new ManagerInfo { NamespaceName = "StatusEffectManager", ClassName = "CustomSE", LatestVersion = "1.0.0", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.Magenta },
         };
 
         public void Awake()
@@ -141,7 +141,20 @@ namespace ManagerDetector
             }
         }
 
-        private static List<string> FormatAligned(List<ModEntry> entries)
+        private static string FormatVersionStatus(string? detectedVersion, string? latestVersion)
+        {
+            if (detectedVersion == null)
+                return "Manager version not found, may need updating";
+
+            if (latestVersion == null)
+                return $"Manager v{detectedVersion}";
+
+            return detectedVersion == latestVersion
+                ? $"Manager v{detectedVersion} (latest)"
+                : $"Manager v{detectedVersion} (latest: v{latestVersion}, update available)";
+        }
+
+        private static List<string> FormatAligned(List<ModEntry> entries, string? latestVersion)
         {
             int maxName = 0, maxGuid = 0, maxDll = 0;
             foreach (ModEntry entry in entries)
@@ -158,9 +171,7 @@ namespace ManagerDetector
                 string nameCol = $"{entry.Name} v{entry.Version}".PadRight(maxName);
                 string guidCol = entry.Guid.PadRight(maxGuid);
                 string dllCol = entry.DllName.PadRight(maxDll);
-                string versionCol = entry.ManagerVersion != null
-                    ? $"Manager v{entry.ManagerVersion}"
-                    : "Manager version not found, consider updating!";
+                string versionCol = FormatVersionStatus(entry.ManagerVersion, latestVersion);
                 lines.Add($"{nameCol} | {guidCol} | {dllCol} | {versionCol}");
             }
 
@@ -175,7 +186,7 @@ namespace ManagerDetector
             ConsoleManager.ConsoleStream.WriteLine(headerMessage);
 
             if (managerInfo.Entries == null) return;
-            List<string> lines = FormatAligned(managerInfo.Entries);
+            List<string> lines = FormatAligned(managerInfo.Entries, managerInfo.LatestVersion);
             foreach (string line in lines)
             {
                 ConsoleManager.StandardOutStream.WriteLine($"[Debug  :{ModName}] {line}");
@@ -195,7 +206,7 @@ namespace ManagerDetector
             ManagerDetectorLogger.LogInfo($"{Environment.NewLine}The following mods have {managerInfo.NamespaceName}:");
 
             if (managerInfo.Entries == null) return;
-            List<string> lines = FormatAligned(managerInfo.Entries);
+            List<string> lines = FormatAligned(managerInfo.Entries, managerInfo.LatestVersion);
             foreach (string line in lines)
             {
                 ManagerDetectorLogger.LogInfo(line);
@@ -219,6 +230,7 @@ namespace ManagerDetector
     {
         public string? NamespaceName { get; set; }
         public string? ClassName { get; set; }
+        public string? LatestVersion { get; set; }
         public List<ModEntry>? Entries { get; set; }
         public ConsoleColor ConsoleColor { get; set; }
     }

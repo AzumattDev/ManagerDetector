@@ -1,6 +1,6 @@
 | `Version` | `Update Notes`                                                                                           |
 |-----------|----------------------------------------------------------------------------------------------------------|
-| 1.0.6     | - Add manager version detection for all managers. Log outdated managers that need updating. Add support for LocalizationManager and StatusEffectManager. Fix ReflectionTypeLoadException crash. |
+| 1.0.6     | - Add manager version detection with latest version comparison. Aligned column output for cleaner logs. Add DLL name to output. Add support for LocalizationManager and StatusEffectManager. Fix ReflectionTypeLoadException crash. |
 | 1.0.5     | - Increment version for Bog Witch. Courtesy Update to make sure you know this exists and it still works. |
 | 1.0.4     | - Increment version for Valheim 0.217.46. Courtesy Update.                                               |
 | 1.0.3     | - Fix logging to disk to not require double logs in the console.                                         |
