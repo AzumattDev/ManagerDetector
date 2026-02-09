@@ -57,9 +57,19 @@ namespace ManagerDetector
 
         private static Type? GetManagerType(Assembly assembly, string? namespaceName, string? className)
         {
-            foreach (Type type in assembly.GetTypes())
+            Type[] types;
+            try
             {
-                if (type.Namespace == namespaceName && type.Name == className)
+                types = assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                types = ex.Types;
+            }
+
+            foreach (Type? type in types)
+            {
+                if (type != null && type.Namespace == namespaceName && type.Name == className)
                 {
                     return type;
                 }
