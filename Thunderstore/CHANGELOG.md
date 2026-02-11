@@ -1,9 +1,10 @@
-| `Version` | `Update Notes`                                                                                           |
-|-----------|----------------------------------------------------------------------------------------------------------|
+| `Version` | `Update Notes`                                                                                                                                                                                                                      |
+|-----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1.0.7     | - Update LocalizationManager version string to check newest 1.4.1.                                                                                                                                                                  |
 | 1.0.6     | - Add manager version detection with latest version comparison. Aligned column output for cleaner logs. Add DLL name to output. Add support for LocalizationManager and StatusEffectManager. Fix ReflectionTypeLoadException crash. |
-| 1.0.5     | - Increment version for Bog Witch. Courtesy Update to make sure you know this exists and it still works. |
-| 1.0.4     | - Increment version for Valheim 0.217.46. Courtesy Update.                                               |
-| 1.0.3     | - Fix logging to disk to not require double logs in the console.                                         |
-| 1.0.2     | - Add logging to disk, per request. Sadly, this makes duplicate logs                                     |
-| 1.0.1     | - Update some internal code to be a little less iffy, and a little more spiffy                           |
-| 1.0.0     | - Initial Release                                                                                        |
+| 1.0.5     | - Increment version for Bog Witch. Courtesy Update to make sure you know this exists and it still works.                                                                                                                            |
+| 1.0.4     | - Increment version for Valheim 0.217.46. Courtesy Update.                                                                                                                                                                          |
+| 1.0.3     | - Fix logging to disk to not require double logs in the console.                                                                                                                                                                    |
+| 1.0.2     | - Add logging to disk, per request. Sadly, this makes duplicate logs                                                                                                                                                                |
+| 1.0.1     | - Update some internal code to be a little less iffy, and a little more spiffy                                                                                                                                                      |
+| 1.0.0     | - Initial Release                                                                                                                                                                                                                   |

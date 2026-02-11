@@ -16,7 +16,7 @@ namespace ManagerDetector
     public class ManagerDetectorPlugin : BaseUnityPlugin
     {
         internal const string ModName = "ManagerDetector";
-        internal const string ModVersion = "1.0.6";
+        internal const string ModVersion = "1.0.7";
         internal const string Author = "Azumatt";
         private const string ModGUID = Author + "." + ModName;
 
@@ -32,7 +32,7 @@ namespace ManagerDetector
             new ManagerInfo { NamespaceName = "SkillManager", ClassName = "Skill", LatestVersion = "1.7.0", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.Cyan },
             new ManagerInfo { NamespaceName = "LocationManager", ClassName = "Location", LatestVersion = null, Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkCyan },
             new ManagerInfo { NamespaceName = "CreatureManager", ClassName = "Creature", LatestVersion = "1.13.0", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkMagenta },
-            new ManagerInfo { NamespaceName = "LocalizationManager", ClassName = "Localizer", LatestVersion = "1.4.0", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkRed },
+            new ManagerInfo { NamespaceName = "LocalizationManager", ClassName = "Localizer", LatestVersion = "1.4.1", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkRed },
             new ManagerInfo { NamespaceName = "StatusEffectManager", ClassName = "CustomSE", LatestVersion = "1.0.0", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.Magenta },
         };
 
