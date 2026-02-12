@@ -16,7 +16,7 @@ namespace ManagerDetector
     public class ManagerDetectorPlugin : BaseUnityPlugin
     {
         internal const string ModName = "ManagerDetector";
-        internal const string ModVersion = "1.0.7";
+        internal const string ModVersion = "1.0.8";
         internal const string Author = "Azumatt";
         private const string ModGUID = Author + "." + ModName;
 
@@ -26,7 +26,7 @@ namespace ManagerDetector
 
         private static readonly List<ManagerInfo> Managers = new()
         {
-            new ManagerInfo { NamespaceName = "PieceManager", ClassName = "BuildPiece", LatestVersion = "1.2.9", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkGreen },
+            new ManagerInfo { NamespaceName = "PieceManager", ClassName = "BuildPiece", LatestVersion = "1.2.10", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkGreen },
             new ManagerInfo { NamespaceName = "ItemManager", ClassName = "Item", LatestVersion = "1.2.9", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.DarkYellow },
             new ManagerInfo { NamespaceName = "ItemDataManager", ClassName = "ItemInfo", LatestVersion = null, Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.Blue },
             new ManagerInfo { NamespaceName = "SkillManager", ClassName = "Skill", LatestVersion = "1.7.0", Entries = new List<ModEntry>(), ConsoleColor = ConsoleColor.Cyan },

@@ -1,6 +1,6 @@
 {
   "name": "ManagerDetector",
-  "version_number": "1.0.7",
+  "version_number": "1.0.8",
   "website_url": "https://github.com/AzumattDev/ManagerDetector",
   "description": "A debugging developer tool that determines what mods you have that are using any of the managers made by Blaxxun/Azumatt",
   "dependencies": [
